@@ -1,248 +1,407 @@
-function SamCSS(defaultFontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif") {
-  // Apply default font to all text elements
-  document.querySelectorAll("body *").forEach(el => {
-      if (el.nodeType === Node.ELEMENT_NODE && el.children.length === 0) {
-          el.style.fontFamily = defaultFontFamily;
+const cssPropertyMap = {
+    // Layout & Box Model
+    'w': 'width',
+    'h': 'height',
+    'p': 'padding',
+    'pt': 'padding-top',
+    'pr': 'padding-right',
+    'pb': 'padding-bottom',
+    'pl': 'padding-left',
+    'border': 'border',
+    'bw': 'border-width',
+    'bs': 'border-style',
+    'bc': 'border-color',
+    'bt': 'border-top',
+    'br': 'border-right',
+    'bb': 'border-bottom',
+    'bl': 'border-left',
+    'brd': 'border-radius',
+    'brtl': 'border-top-left-radius',
+    'brtr': 'border-top-right-radius',
+    'brbr': 'border-bottom-right-radius',
+    'brbl': 'border-bottom-left-radius',
+    'm': 'margin',
+    'mt': 'margin-top',
+    'mr': 'margin-right',
+    'mb': 'margin-bottom',
+    'ml': 'margin-left',
+    'bxsz': 'box-sizing',
+    'o': 'overflow',
+    'ox': 'overflow-x',
+    'oy': 'overflow-y',
+    'cp': 'clip-path',
+    'osh': 'overscroll-behavior',
+    'oshx': 'overscroll-behavior-x',
+    'oshy': 'overscroll-behavior-y',
+    'ct': 'contain',
+    'cis': 'contain-intrinsic-size',
+    'ciw': 'contain-intrinsic-width',
+    'cih': 'contain-intrinsic-height',
+  
+    // Positioning
+    'pos': 'position',
+    't': 'top',
+    'r': 'right',
+    'b': 'bottom',
+    'l': 'left',
+    'z': 'z-index',
+    'is': 'inset',
+    'ibst': 'inset-block-start',
+    'ibend': 'inset-block-end',
+    'iist': 'inset-inline-start',
+    'iiend': 'inset-inline-end',
+  
+    // Display & Visibility
+    'd': 'display',
+    'v': 'visibility',
+    'f': 'float',
+    'c': 'clear',
+  
+    // Columns
+    'col': 'columns',
+    'cow': 'column-width',
+    'coc': 'column-count',
+    'cog': 'column-gap',
+    'cor': 'column-rule',
+    'corw': 'column-rule-width',
+    'cors': 'column-rule-style',
+    'corc': 'column-rule-color',
+    'cos': 'column-span',
+    'cof': 'column-fill',
+    'bbfr': 'break-before',
+    'bins': 'break-inside',
+    'baft': 'break-after',
+  
+    // Flexbox
+    'fd': 'flex-direction',
+    'fw': 'flex-wrap',
+    'ff': 'flex-flow',
+    'jc': 'justify-content',
+    'ai': 'align-items',
+    'ac': 'align-content',
+    'fl': 'flex',
+    'flg': 'flex-grow',
+    'fls': 'flex-shrink',
+    'flb': 'flex-basis',
+    'as': 'align-self',
+    'g': 'gap',
+    'rg': 'row-gap',
+    'cg': 'column-gap',
+  
+    // Grid Layout
+    'pi': 'place-items',
+    'pc': 'place-content',
+    'ps': 'place-self',
+    'gtr': 'grid-template-rows',
+    'gtc': 'grid-template-columns',
+    'gta': 'grid-template-areas',
+    'gt': 'grid-template',
+    'grst': 'grid-row-start',
+    'gred': 'grid-row-end',
+    'gcst': 'grid-column-start',
+    'gced': 'grid-column-end',
+    'ga': 'grid-area',
+    'gar': 'grid-auto-rows',
+    'gac': 'grid-auto-columns',
+    'gaf': 'grid-auto-flow',
+    'gg': 'grid-gap',
+    'grg': 'grid-row-gap',
+    'gcg': 'grid-column-gap',
+    'ji': 'justify-items',
+    'aj': 'align-items',
+    'jco': 'justify-content',
+    'aco': 'align-content',
+  
+    // Typography
+    'ffam': 'font-family',
+    'fs': 'font-size',
+    'fst': 'font-style',
+    'fw': 'font-weight',
+    'fv': 'font-variant',
+    'f': 'font',
+    'lh': 'line-height',
+    'ta': 'text-align',
+    'td': 'text-decoration',
+    'tdl': 'text-decoration-line',
+    'tds': 'text-decoration-style',
+    'tdc': 'text-decoration-color',
+    'lts': 'letter-spacing',
+    'ls': 'letter-spacing', // Added this common alias
+    'ws': 'word-spacing',
+    'wsp': 'white-space',
+    'ts': 'text-shadow',
+    'wb': 'word-break',
+    'owr': 'overflow-wrap',
+    'tsz': 'tab-size',
+    'to': 'text-overflow',
+    'fk': 'font-kerning',
+    'ffs': 'font-feature-settings',
+    'fvs': 'font-variation-settings',
+    'fsy': 'font-synthesis',
+    'tr': 'text-rendering',
+    'tj': 'text-justify',
+  
+    // Colors & Backgrounds
+    'colr': 'color',
+    'bgc': 'background-color',
+    'bgi': 'background-image',
+    'bgr': 'background-repeat',
+    'bgp': 'background-position',
+    'bgs': 'background-size',
+    'bga': 'background-attachment',
+    'bg': 'background',
+    'bgo': 'background-origin',
+    'bgcl': 'background-clip',
+    'bgbm': 'background-blend-mode',
+    'op': 'opacity',
+  
+    // Transitions & Animations
+    'trns': 'transition',
+    'trp': 'transition-property',
+    'trd': 'transition-duration',
+    'trtf': 'transition-timing-function',
+    'trdl': 'transition-delay',
+    'anim': 'animation',
+    'animn': 'animation-name',
+    'animd': 'animation-duration',
+    'animtf': 'animation-timing-function',
+    'animdl': 'animation-delay',
+    'animi': 'animation-iteration-count',
+    'animdir': 'animation-direction',
+    'animfm': 'animation-fill-mode',
+    'animpst': 'animation-play-state',
+  
+    // Transforms & 3D
+    'tf': 'transform',
+    'tfo': 'transform-origin',
+    'tfs': 'transform-style',
+    'pers': 'perspective',
+    'perso': 'perspective-origin',
+    'bcv': 'backface-visibility',
+  
+    // Filters & Effects
+    'fltr': 'filter',
+    'bfltr': 'backdrop-filter',
+  
+    // SVG Properties
+    'fill': 'fill',
+    'stroke': 'stroke',
+    'strokew': 'stroke-width',
+    'strokecap': 'stroke-linecap',
+    'strokejoin': 'stroke-linejoin',
+    'strokedash': 'stroke-dasharray',
+    'strokedasho': 'stroke-dashoffset',
+  
+    // Misc UI Properties
+    'curs': 'cursor',
+    'outl': 'outline',
+    'outlw': 'outline-width',
+    'outls': 'outline-style',
+    'outlc': 'outline-color',
+    'rsz': 'resize',
+    'us': 'user-select',
+    'pe': 'pointer-events',
+    'cc': 'caret-color',
+    'scrbh': 'scroll-behavior',
+    'scrbs': 'scroll-snap-type',
+    'scrba': 'scroll-snap-align',
+  
+    // Lists & Tables
+    'lstst': 'list-style-type',
+    'lstspos': 'list-style-position',
+    'lstsi': 'list-style-image',
+    'lsts': 'list-style',
+    'bdrcol': 'border-collapse',
+    'bdrsp': 'border-spacing',
+    'caps': 'caption-side',
+    'ec': 'empty-cells',
+    'tbllyt': 'table-layout',
+  
+    // Paged Media
+    'pbbfr': 'page-break-before',
+    'pbbaft': 'page-break-after',
+    'pbbins': 'page-break-inside',
+    'orph': 'orphans',
+    'wids': 'widows',
+  
+    // Containment
+    'cntn': 'contain',
+  
+    // Masking
+    'mskimg': 'mask-image',
+    'mskmd': 'mask-mode',
+    'mskrpt': 'mask-repeat',
+    'mskpos': 'mask-position',
+    'msksz': 'mask-size',
+    'mskorg': 'mask-origin',
+    'mskclp': 'mask-clip',
+    'mskcomp': 'mask-composite',
+    'msk': 'mask',
+  
+    // Object Properties
+    'objfit': 'object-fit',
+    'objpos': 'object-position',
+  
+    // Logical Properties
+    'insz': 'inline-size',
+    'blksz': 'block-size',
+    'mis': 'margin-inline-start',
+    'mies': 'margin-inline-end',
+    'mbs': 'margin-block-start',
+    'mbe': 'margin-block-end',
+    'pis': 'padding-inline-start',
+    'pies': 'padding-inline-end',
+    'pbs': 'padding-block-start',
+    'pbe': 'padding-block-end'
+  };
+  
+  // Units map for different value types
+  const unitMap = {
+    'default': 'rem', // Default unit
+    'unitless': ['z-index', 'opacity', 'flex', 'flex-grow', 'flex-shrink', 
+                 'column-count', 'font-weight', 'line-height', 'orphans', 'widows'],
+    'special': {
+      'display': {
+        'b': 'block',
+        'i': 'inline',
+        'ib': 'inline-block',
+        'f': 'flex',
+        'g': 'grid',
+        'n': 'none'
+      },
+      'position': {
+        'r': 'relative',
+        'a': 'absolute',
+        'f': 'fixed',
+        's': 'static',
+        'st': 'sticky'
+      },
+      'text-align': {
+        'l': 'left',
+        'r': 'right',
+        'c': 'center',
+        'j': 'justify'
+      },
+      'font-weight': {
+        'n': 'normal',
+        'b': 'bold',
+        'l': 'light'
+      },
+      'overflow': {
+        'a': 'auto',
+        'h': 'hidden',
+        's': 'scroll',
+        'v': 'visible'
+      },
+      'visibility': {
+        'v': 'visible',
+        'h': 'hidden',
+        'c': 'collapse'
+      },
+      'border-style': {
+        's': 'solid',
+        'd': 'dashed',
+        'dot': 'dotted',
+        'n': 'none'
+      },
+      'flex-direction': {
+        'r': 'row',
+        'c': 'column',
+        'rr': 'row-reverse',
+        'cr': 'column-reverse'
+      },
+      'justify-content': {
+        'fs': 'flex-start',
+        'fe': 'flex-end',
+        'c': 'center',
+        'sb': 'space-between',
+        'sa': 'space-around',
+        'se': 'space-evenly'
+      },
+      'align-items': {
+        'fs': 'flex-start',
+        'fe': 'flex-end',
+        'c': 'center',
+        'b': 'baseline',
+        's': 'stretch'
       }
-  });
-  document.querySelectorAll("[class]").forEach((el) => {
-      const classList = el.classList;
-
-      classList.forEach((className) => {
-          let property, value;
-
-          // Box Model
-          if (className.startsWith("w-")) { property = "width"; value = className.substring(2); }
-          else if (className.startsWith("h-")) { property = "height"; value = className.substring(2); }
-          else if (className.startsWith("minw-")) { property = "min-width"; value = className.substring(4); }
-          else if (className.startsWith("maxw-")) { property = "max-width"; value = className.substring(4); }
-          else if (className.startsWith("minh-")) { property = "min-height"; value = className.substring(4); }
-          else if (className.startsWith("maxh-")) { property = "max-height"; value = className.substring(4); }
-          else if (className.startsWith("p-")) { property = "padding"; value = className.substring(2); }
-          else if (className.startsWith("pt-")) { property = "padding-top"; value = className.substring(3); }
-          else if (className.startsWith("pr-")) { property = "padding-right"; value = className.substring(3); }
-          else if (className.startsWith("pb-")) { property = "padding-bottom"; value = className.substring(3); }
-          else if (className.startsWith("pl-")) { property = "padding-left"; value = className.substring(3); }
-          else if (className.startsWith("bw-")) { property = "border-width"; value = className.substring(3); }
-          else if (className.startsWith("bs-")) { property = "border-style"; value = className.substring(3); }
-          else if (className.startsWith("bc-")) { property = "border-color"; value = className.substring(3); }
-          else if (className.startsWith("br-")) { property = "border-radius"; value = className.substring(3); }
-          else if (className.startsWith("m-")) { property = "margin"; value = className.substring(2); }
-          else if (className.startsWith("mt-")) { property = "margin-top"; value = className.substring(3); }
-          else if (className.startsWith("mr-")) { property = "margin-right"; value = className.substring(3); }
-          else if (className.startsWith("mb-")) { property = "margin-bottom"; value = className.substring(3); }
-          else if (className.startsWith("ml-")) { property = "margin-left"; value = className.substring(3); }
-          else if (className.startsWith("boxs-")) { property = "box-sizing"; value = className.substring(5); }
-          else if (className.startsWith("olw-")) { property = "outline-width"; value = className.substring(4); }
-          else if (className.startsWith("ols-")) { property = "outline-style"; value = className.substring(4); }
-          else if (className.startsWith("olc-")) { property = "outline-color"; value = className.substring(4); }
-          else if (className.startsWith("olo-")) { property = "outline-offset"; value = className.substring(4); }
-
-          // Flexbox
-          else if (className.startsWith("d-")) { property = "display"; value = className.substring(2); }
-          else if (className.startsWith("fd-")) { property = "flex-direction"; value = className.substring(3); }
-          else if (className.startsWith("fw-")) { property = "flex-wrap"; value = className.substring(3); }
-          else if (className.startsWith("jc-")) { property = "justify-content"; value = className.substring(3); }
-          else if (className.startsWith("ai-")) { property = "align-items"; value = className.substring(3); }
-          else if (className.startsWith("ac-")) { property = "align-content"; value = className.substring(3); }
-          else if (className.startsWith("gap-")) { property = "gap"; value = className.substring(4); }
-          else if (className.startsWith("order-")) { property = "order"; value = className.substring(6); }
-          else if (className.startsWith("fg-")) { property = "flex-grow"; value = className.substring(3); }
-          else if (className.startsWith("fs-")) { property = "flex-shrink"; value = className.substring(3); }
-          else if (className.startsWith("fb-")) { property = "flex-basis"; value = className.substring(3); }
-          else if (className.startsWith("as-")) { property = "align-self"; value = className.substring(3); }
-
-          // Typography
-          else if (className.startsWith("ff-")) { property = "font-family"; value = className.substring(3); }
-          else if (className.startsWith("fz-")) { property = "font-size"; value = className.substring(3); }
-          else if (className.startsWith("fweight-")) { property = "font-weight"; value = className.substring(6); }
-          else if (className.startsWith("fstyle-")) { property = "font-style"; value = className.substring(6); }
-          else if (className.startsWith("lh-")) { property = "line-height"; value = className.substring(3); }
-          else if (className.startsWith("ls-")) { property = "letter-spacing"; value = className.substring(3); }
-          else if (className.startsWith("ws-")) { property = "word-spacing"; value = className.substring(3); }
-          else if (className.startsWith("ta-")) { property = "text-align"; value = className.substring(3); }
-          else if (className.startsWith("td-")) { property = "text-decoration"; value = className.substring(3); }
-          else if (className.startsWith("tt-")) { property = "text-transform"; value = className.substring(3); }
-          else if (className.startsWith("ti-")) { property = "text-indent"; value = className.substring(3); }
-          else if (className.startsWith("ts-")) { property = "text-shadow"; value = className.substring(3); }
-          else if (className.startsWith("ws-")) { property = "white-space"; value = className.substring(3); }
-          else if (className.startsWith("ow-")) { property = "overflow-wrap"; value = className.substring(3); }
-          else if (className.startsWith("dir-")) { property = "direction"; value = className.substring(4); }
-          else if (className.startsWith("ub-")) { property = "unicode-bidi"; value = className.substring(3); }
-
-          // Positioning
-          else if (className.startsWith("pos-")) { property = "position"; value = className.substring(4); }
-          else if (className.startsWith("top-")) { property = "top"; value = className.substring(4); }
-          else if (className.startsWith("right-")) { property = "right"; value = className.substring(6); }
-          else if (className.startsWith("bottom-")) { property = "bottom"; value = className.substring(7); }
-          else if (className.startsWith("left-")) { property = "left"; value = className.substring(5); }
-          else if (className.startsWith("zi-")) { property = "z-index"; value = className.substring(3); }
-
-          // Background
-          else if (className.startsWith("bgc-")) { property = "background-color"; value = className.substring(4); }
-          else if (className.startsWith("bgi-")) { property = "background-image"; value = className.substring(4); }
-          else if (className.startsWith("bgr-")) { property = "background-repeat"; value = className.substring(4); }
-          else if (className.startsWith("bgp-")) { property = "background-position"; value = className.substring(4); }
-          else if (className.startsWith("bgs-")) { property = "background-size"; value = className.substring(4); }
-          else if (className.startsWith("bgo-")) { property = "background-origin"; value = className.substring(4); }
-          else if (className.startsWith("bgcl-")) { property = "background-clip"; value = className.substring(5); }
-          else if (className.startsWith("bga-")) { property = "background-attachment"; value = className.substring(4); }
-          else if (className.startsWith("bgbl-")) { property = "background-blend-mode"; value = className.substring(5); }
-
-          // Colors
-          else if (className.startsWith("c-")) { property = "color"; value = className.substring(2); }
-
-          // Transforms
-          else if (className.startsWith("trans-")) { property = "transform"; value = className.substring(6); }
-          else if (className.startsWith("to-")) { property = "transform-origin"; value = className.substring(3); }
-          else if (className.startsWith("ts-")) { property = "transform-style"; value = className.substring(3); }
-          else if (className.startsWith("per-")) { property = "perspective"; value = className.substring(4); }
-          else if (className.startsWith("pero-")) { property = "perspective-origin"; value = className.substring(5); }
-
-          // Transitions
-          else if (className.startsWith("tran-")) { property = "transition"; value = className.substring(5); }
-          else if (className.startsWith("tp-")) { property = "transition-property"; value = className.substring(3); }
-          else if (className.startsWith("tdur-")) { property = "transition-duration"; value = className.substring(5); }
-          else if (className.startsWith("ttf-")) { property = "transition-timing-function"; value = className.substring(4); }
-          else if (className.startsWith("tdel-")) { property = "transition-delay"; value = className.substring(5); }
-
-          // Animations
-          else if (className.startsWith("anim-")) { property = "animation"; value = className.substring(5); }
-          else if (className.startsWith("aname-")) { property = "animation-name"; value = className.substring(6); }
-          else if (className.startsWith("adur-")) { property = "animation-duration"; value = className.substring(5); }
-          else if (className.startsWith("atf-")) { property = "animation-timing-function"; value = className.substring(4); }
-          else if (className.startsWith("adel-")) { property = "animation-delay"; value = className.substring(5); }
-          else if (className.startsWith("aic-")) { property = "animation-iteration-count"; value = className.substring(4); }
-          else if (className.startsWith("adir-")) { property = "animation-direction"; value = className.substring(5); }
-          else if (className.startsWith("afm-")) { property = "animation-fill-mode"; value = className.substring(4); }
-          else if (className.startsWith("aps-")) { property = "animation-play-state"; value = className.substring(4); }
-
-          // Gradients and Masks
-          else if (className.startsWith("maski-")) { property = "mask-image"; value = className.substring(5); }
-          else if (className.startsWith("maskm-")) { property = "mask-mode"; value = className.substring(5); }
-          else if (className.startsWith("maskr-")) { property = "mask-repeat"; value = className.substring(5); }
-          else if (className.startsWith("maskp-")) { property = "mask-position"; value = className.substring(5); }
-          else if (className.startsWith("masks-")) { property = "mask-size"; value = className.substring(5); }
-          else if (className.startsWith("masko-")) { property = "mask-origin"; value = className.substring(5); }
-          else if (className.startsWith("maskcl-")) { property = "mask-clip"; value = className.substring(6); }
-          else if (className.startsWith("maskcomp-")) { property = "mask-composite"; value = className.substring(9); }
-          else if (className.startsWith("maskb-")) { property = "mask-border"; value = className.substring(5); }
-          else if (className.startsWith("clip-")) { property = "clip-path"; value = className.substring(5); }
-
-          // Filters
-          else if (className.startsWith("filt-")) { property = "filter"; value = className.substring(5); }
-
-          // Grid Layout
-          else if (className.startsWith("gtrows-")) { property = "grid-template-rows"; value = className.substring(7); }
-          else if (className.startsWith("gtcols-")) { property = "grid-template-columns"; value = className.substring(7); }
-          else if (className.startsWith("gtareas-")) { property = "grid-template-areas"; value = className.substring(8); }
-          else if (className.startsWith("gtemp-")) { property = "grid-template"; value = className.substring(6); }
-          else if (className.startsWith("growgap-")) { property = "grid-row-gap"; value = className.substring(8); }
-          else if (className.startsWith("gcolgap-")) { property = "grid-column-gap"; value = className.substring(9); }
-          else if (className.startsWith("ggap-")) { property = "grid-gap"; value = className.substring(5); }
-          else if (className.startsWith("garows-")) { property = "grid-auto-rows"; value = className.substring(8); }
-          else if (className.startsWith("gacols-")) { property = "grid-auto-columns"; value = className.substring(9); }
-          else if (className.startsWith("gaflow-")) { property = "grid-auto-flow"; value = className.substring(7); }
-          else if (className.startsWith("ji-")) { property = "justify-items"; value = className.substring(3); }
-          else if (className.startsWith("ali-")) { property = "align-items"; value = className.substring(4); }
-          else if (className.startsWith("pi-")) { property = "place-items"; value = className.substring(3); }
-          else if (className.startsWith("jc-")) { property = "justify-content"; value = className.substring(3); }
-          else if (className.startsWith("ac-")) { property = "align-content"; value = className.substring(3); }
-          else if (className.startsWith("pc-")) { property = "place-content"; value = className.substring(3); }
-          else if (className.startsWith("grstart-")) { property = "grid-row-start"; value = className.substring(8); }
-          else if (className.startsWith("grend-")) { property = "grid-row-end"; value = className.substring(7); }
-          else if (className.startsWith("grow-")) { property = "grid-row"; value = className.substring(5); }
-          else if (className.startsWith("gcstart-")) { property = "grid-column-start"; value = className.substring(9); }
-          else if (className.startsWith("gcend-")) { property = "grid-column-end"; value = className.substring(8); }
-          else if (className.startsWith("gcol-")) { property = "grid-column"; value = className.substring(6); }
-          else if (className.startsWith("garea-")) { property = "grid-area"; value = className.substring(5); }
-          else if (className.startsWith("js-")) { property = "justify-self"; value = className.substring(3); }
-          else if (className.startsWith("als-")) { property = "align-self"; value = className.substring(4); }
-          else if (className.startsWith("ps-")) { property = "place-self"; value = className.substring(3); }
-
-          // Other Properties
-          else if (className.startsWith("curs-")) { property = "cursor"; value = className.substring(5); }
-          else if (className.startsWith("pe-")) { property = "pointer-events"; value = className.substring(3); }
-          else if (className.startsWith("res-")) { property = "resize"; value = className.substring(4); }
-          else if (className.startsWith("us-")) { property = "user-select"; value = className.substring(3); }
-          else if (className.startsWith("app-")) { property = "appearance"; value = className.substring(4); }
-          else if (className.startsWith("cont-")) { property = "content"; value = className.substring(5); }
-          else if (className.startsWith("cc-")) { property = "caret-color"; value = className.substring(3); }
-          else if (className.startsWith("sb-")) { property = "scroll-behavior"; value = className.substring(3); }
-          else if (className.startsWith("sst-")) { property = "scroll-snap-type"; value = className.substring(4); }
-          else if (className.startsWith("ssa-")) { property = "scroll-snap-align"; value = className.substring(4); }
-
-          // Table
-          else if (className.startsWith("bc-")) { property = "border-collapse";value = className.substring(3); }
-          else if (className.startsWith("bs-")) { property = "border-spacing"; value = className.substring(3); }
-          else if (className.startsWith("cs-")) { property = "caption-side"; value = className.substring(3); }
-          else if (className.startsWith("ec-")) { property = "empty-cells"; value = className.substring(3); }
-          else if (className.startsWith("tl-")) { property = "table-layout"; value = className.substring(3); }
-
-          // Lists
-          else if (className.startsWith("ls-")) { property = "list-style"; value = className.substring(3); }
-          else if (className.startsWith("lst-")) { property = "list-style-type"; value = className.substring(4); }
-          else if (className.startsWith("lsp-")) { property = "list-style-position"; value = className.substring(4); }
-          else if (className.startsWith("lsi-")) { property = "list-style-image"; value = className.substring(4); }
-
-          // Overflow and Clipping
-          else if (className.startsWith("ov-")) { property = "overflow"; value = className.substring(3); }
-          else if (className.startsWith("ovx-")) { property = "overflow-x"; value = className.substring(4); }
-          else if (className.startsWith("ovy-")) { property = "overflow-y"; value = className.substring(4); }
-          else if (className.startsWith("to-")) { property = "text-overflow"; value = className.substring(3); }
-          else if (className.startsWith("vis-")) { property = "visibility"; value = className.substring(4); }
-
-          // Writing Modes
-          else if (className.startsWith("wm-")) { property = "writing-mode"; value = className.substring(3); }
-          else if (className.startsWith("to-")) { property = "text-orientation"; value = className.substring(3); }
-          else if (className.startsWith("dir-")) { property = "direction"; value = className.substring(4); }
-          else if (className.startsWith("ub-")) { property = "unicode-bidi"; value = className.substring(3); }
-
-          // Print-Specific Styles
-          else if (className.startsWith("bb-")) { property = "break-before"; value = className.substring(3); }
-          else if (className.startsWith("ba-")) { property = "break-after"; value = className.substring(3); }
-          else if (className.startsWith("bi-")) { property = "break-inside"; value = className.substring(3); }
-          else if (className.startsWith("orph-")) { property = "orphans"; value = className.substring(5); }
-          else if (className.startsWith("wid-")) { property = "widows"; value = className.substring(4); }
-
-          // Font Features and OpenType
-          else if (className.startsWith("ffs-")) { property = "font-feature-settings"; value = className.substring(4); }
-          else if (className.startsWith("fvl-")) { property = "font-variant-ligatures"; value = className.substring(4); }
-          else if (className.startsWith("fvc-")) { property = "font-variant-caps"; value = className.substring(4); }
-          else if (className.startsWith("fvn-")) { property = "font-variant-numeric"; value = className.substring(4); }
-          else if (className.startsWith("fvea-")) { property = "font-variant-east-asian"; value = className.substring(5); }
-          else if (className.startsWith("fva-")) { property = "font-variant-alternates"; value = className.substring(4); }
-          else if (className.startsWith("fk-")) { property = "font-kerning"; value = className.substring(3); }
-          else if (className.startsWith("fos-")) { property = "font-optical-sizing"; value = className.substring(4); }
-
-          // Initial values and all property.
-          else if (className.startsWith("iv-")) { property = "initial-value"; value = className.substring(3); }
-          else if (className.startsWith("all-")) { property = "all"; value = className.substring(4); }
-
-          // Unit and value parsing
-          if (property) {
-              try {
-                  let valueToApply = value;
-                  if (["font-size", "border-radius", "border-width", "outline-width", "outline-offset", "width", "height", "min-width", "max-width", "min-height", "max-height", "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left", "gap", "grid-row-gap", "grid-column-gap", "grid-gap"].includes(property)) {
-                      if (!isNaN(value) && !value.includes("%") && !value.includes("rem") && !value.includes("em") && !value.includes("px") && !value.includes("vw") && !value.includes("vh")) {
-                          valueToApply = value + "rem"; // Default to rem
-                      } else if (!isNaN(value) && value.includes("px")){
-                          valueToApply = value; // if already has px, keep it.
-                      } else if (!isNaN(value)){
-                          valueToApply = value + "rem";
-                      }
-                      else {
-                          valueToApply = value; // Keep existing units (%, rem, em, vw, vh, etc.)
-                      }
-                  }
-
-                  el.style[property] = valueToApply;
-              } catch (error) {
-                  console.warn(`Error applying style: ${property}: ${value}`, error);
-              }
+    }
+  };
+  
+  // Main function to process class names
+  function processClassNames(element) {
+    const classes = element.classList;
+    const stylesToApply = {};
+    
+    for (const className of classes) {
+      // Check if this is a utility class (contains a dash)
+      if (className.includes('-')) {
+        const [prefix, value] = className.split('-');
+        
+        // Check if this prefix exists in our map
+        if (prefix in cssPropertyMap) {
+          const property = cssPropertyMap[prefix];
+          let finalValue = value;
+          
+          // Process special values (like display-b for display: block)
+          if (property in unitMap.special && value in unitMap.special[property]) {
+            finalValue = unitMap.special[property][value];
+          } 
+          // Process unitless properties
+          else if (unitMap.unitless.includes(property)) {
+            finalValue = value; // No unit
           }
+          // Handle color values with hex codes
+          else if (value.startsWith('hex')) {
+            finalValue = `#${value.substring(3)}`;
+          }
+          // Default case - add the default unit
+          else if (!isNaN(value)) {
+            finalValue = `${value}${unitMap.default}`;
+          }
+          
+          stylesToApply[property] = finalValue;
+        }
+      }
+    }
+    
+    // Apply all collected styles to the element
+    Object.entries(stylesToApply).forEach(([property, value]) => {
+      element.style[property] = value;
+    });
+  }
+  
+  // Function to process the entire document
+  function processDocument() {
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(processClassNames);
+  }
+  
+  // Run when the DOM is fully loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    processDocument();
+    
+    // Optional: Set up a mutation observer to watch for dynamically added elements
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) { // Element node
+              processClassNames(node);
+              const childElements = node.querySelectorAll('*');
+              childElements.forEach(processClassNames);
+            }
+          });
+        } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          processClassNames(mutation.target);
+        }
       });
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    });
   });
-}
-
-SamCSS();
